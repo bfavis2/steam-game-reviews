@@ -13,7 +13,7 @@ import pathlib
 import json
 import time
 
-class steam_api():
+class steamAPI():
     
     def __init__(self, appid, filter_=None, language=None, day_range=None,cursor=None,
                 review_type=None, purchase_type=None, num_per_page=None):
@@ -33,7 +33,11 @@ class steam_api():
         pass
     
     def set_parameters(self, **kwargs):
-        pass
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                print('There is no attribute named {}'.format(key))
     
     def get_appid(self, product):
         pass
