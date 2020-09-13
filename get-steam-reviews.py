@@ -15,9 +15,9 @@ import time
 
 class steamAPI():
     
-    def __init__(self, appid, filter_=None, language=None, day_range=None,cursor=None,
-                review_type=None, purchase_type=None, num_per_page=None):
-        self.filter_ = filter_
+    def __init__(self, appid, filter_='recent', language='english', day_range=None,
+                 cursor='*', review_type='all', purchase_type='steam', num_per_page='20'):
+        self.filter = filter_
         self.language = language
         self.day_range = day_range
         self.cursor = cursor
@@ -43,8 +43,11 @@ class steamAPI():
         pass
     
     def build_request(self):
-        pass
-        
+        start = f'https://store.steampowered.com/appreviews/{self.appid}?json=1'
+        params = vars(self)
+        params['appid'] = None
+        r = requests.get(start, params)
+        return r.url
     
     
         
