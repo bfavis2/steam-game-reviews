@@ -42,15 +42,15 @@ class steamAPI():
     def get_appid(self, product):
         pass
     
-    def build_request(self):
+    def make_request(self):
+        'Builds the request URL and returns a response object'
         start = f'https://store.steampowered.com/appreviews/{self.appid}?json=1'
         params = vars(self)
         params['appid'] = None
         r = requests.get(start, params)
-        return r.url
-    
-    
-        
+        return r
 
-steam_api = 'https://store.steampowered.com/appreviews/'
+
+s = steamAPI(427520) # Factorio appid
+r = s.make_request()
 
