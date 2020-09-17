@@ -27,7 +27,17 @@ class steamAPI():
         self.appid = appid
         
     def parse_data(self):
-        pass
+        total = 0
+        json_text = self.make_request().json()
+        while json_text['success'] == 1:
+            num_reviews = int(json_text['query_summary']['num_reviews'])
+            for _ in range(num_reviews):
+                total += 1
+            self.cursor = json_text['cursor']
+            json_text = self.make_request().json()
+            
+        return total
+            
     
     def call_api(self):
         pass
@@ -40,17 +50,17 @@ class steamAPI():
                 print('There is no attribute named {}'.format(key))
     
     def get_appid(self, product):
-        pass
+        'http://api.steampowered.com/ISteamApps/GetAppList/v2'
     
     def make_request(self):
         'Builds the request URL and returns a response object'
         start = f'https://store.steampowered.com/appreviews/{self.appid}?json=1'
-        params = vars(self)
+        params = vars(self).copy()
         params['appid'] = None
         r = requests.get(start, params)
         return r
 
 
 s = steamAPI(427520) # Factorio appid
-r = s.make_request()
+a = s.parse_data()
 
