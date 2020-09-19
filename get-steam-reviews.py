@@ -25,17 +25,29 @@ class steamAPI():
         self.purchase_type = purchase_type
         self.num_per_page = num_per_page
         self.appid = appid
-        
-    def parse_data(self):
+  
+    def parse_json_review(self, review):
+        review['review']
+        review['author']['playtime_at_review']
+        review['voted_up']
+        review['votes_up']
+        review['timestamp_created']
+        review['votes_funny']
+        review['weighted_vote_score']
+        review['comment_count']
+    
+    def get_all_reviews(self):
         total = 0
         json_text = self.make_request().json()
-        while json_text['success'] == 1:
-            num_reviews = int(json_text['query_summary']['num_reviews'])
-            for _ in range(num_reviews):
+        num_reviews = int(json_text['query_summary']['num_reviews'])
+        while json_text['success'] == 1 and num_reviews > 0:
+            for review in json_text['reviews']:
                 total += 1
+                self.parse_json_review(review)
             self.cursor = json_text['cursor']
+            print(f'Processed:{total} cursor:{self.cursor})')
             json_text = self.make_request().json()
-            
+            num_reviews = int(json_text['query_summary']['num_reviews'])   
         return total
             
     
@@ -62,5 +74,6 @@ class steamAPI():
 
 
 s = steamAPI(427520) # Factorio appid
-a = s.parse_data()
+# s = steamAPI(766040) # Gloom appid
+# a = s.get_all_reviews())
 
