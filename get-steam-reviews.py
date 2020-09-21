@@ -53,7 +53,7 @@ class steamAPI():
                 if total % batch_size == 0:
                     self.export_to_csv(filename)
             self.cursor = json_text['cursor']
-            print(f'Processed:{total} cursor:{self.cursor})')
+            print(f'Processed:{total} cursor:{self.cursor}')
             json_text = self.make_request().json()
             num_reviews = int(json_text['query_summary']['num_reviews']) 
         
@@ -65,14 +65,14 @@ class steamAPI():
         new_row = [
                     index,
                     self.appid,
-                    review['review'],
-                    review['author']['playtime_at_review'],
-                    review['timestamp_created'],
-                    review['voted_up'],
-                    review['votes_up'],
-                    review['votes_funny'],
-                    review['weighted_vote_score'],
-                    review['comment_count']
+                    review.get('review', 'N/A'),
+                    review['author'].get('playtime_at_review', 'N/A'),
+                    review.get('timestamp_created', 'N/A'),
+                    review.get('voted_up', 'N/A'),
+                    review.get('votes_up', 'N/A'),
+                    review.get('votes_funny', 'N/A'),
+                    review.get('weighted_vote_score', 'N/A'),
+                    review.get('comment_count', 'N/A')
                     ]
         self.df.append(new_row)
         return
@@ -82,7 +82,7 @@ class steamAPI():
             csv_writer = csv.writer(f)
             for row in self.df:
                 csv_writer.writerow(row)
-        print(f'Successfully wrote {len(self.df)-1} lines to {filename}')      
+        print(f'Successfully wrote {len(self.df)} lines to {filename}')      
         self.clear_df()
         return
     
@@ -113,9 +113,10 @@ class steamAPI():
         return r
 
 
-# s = steamAPI(427520) # Factorio appid
-# a = s.get_all_reviews('factorio_20200920.csv')
+factorio = steamAPI(427520) # Factorio appid
+factorio.get_all_reviews('factorio_20200920.csv')
 
-s = steamAPI(766040) # Gloom appid
-a = s.get_all_reviews('gloom_20200920.csv')
+gloom = steamAPI(766040) # Gloom appid
+gloom.get_all_reviews('gloom_20200920.csv')
 
+# 'https://store.steampowered.com/appreviews/{self.appid}?json=1?cursor=AoJ4z4ae5eECesOBmgE='
