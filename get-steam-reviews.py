@@ -43,18 +43,22 @@ class steamAPI():
   
     def get_all_reviews(self, filename):
         total = 0
+        batch_size = 100
         json_text = self.make_request().json()
         num_reviews = int(json_text['query_summary']['num_reviews'])
         while json_text['success'] == 1 and num_reviews > 0:
             for review in json_text['reviews']:
                 total += 1
                 self.parse_json_review(review, total)
+                if total % batch_size == 0:
+                    self.export_to_csv(filename)
             self.cursor = json_text['cursor']
             print(f'Processed:{total} cursor:{self.cursor})')
             json_text = self.make_request().json()
             num_reviews = int(json_text['query_summary']['num_reviews']) 
         
         self.export_to_csv(filename)
+        print(f'Processed and exported {total} reviews')
         return
     
     def parse_json_review(self, review, index):
@@ -74,7 +78,7 @@ class steamAPI():
         return
     
     def export_to_csv(self, filename):
-        with open(filename, 'w') as f:
+        with open(filename, 'a') as f:
             csv_writer = csv.writer(f)
             for row in self.df:
                 csv_writer.writerow(row)
@@ -110,6 +114,8 @@ class steamAPI():
 
 
 # s = steamAPI(427520) # Factorio appid
+# a = s.get_all_reviews('factorio_20200920.csv')
+
 s = steamAPI(766040) # Gloom appid
-a = s.get_all_reviews('test.csv')
+a = s.get_all_reviews('gloom_20200920.csv')
 
