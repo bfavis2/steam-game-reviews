@@ -8,10 +8,12 @@ Created on Sat Sep 12 20:17:44 2020
 
 
 import json
+import pandas as pd
 import requests
 import pathlib
 import json
 import time
+import csv
 
 class steamAPI():
     
@@ -25,32 +27,65 @@ class steamAPI():
         self.purchase_type = purchase_type
         self.num_per_page = num_per_page
         self.appid = appid
+        
+        self.df = [[
+                    'index',
+                    'appid', 
+                    'review',
+                    'playtime', 
+                    'time_created',
+                    'recommend',
+                    'liked_votes',
+                    'funny_votes',
+                    'helpfullness_score',
+                    'comment_count'
+                    ]]
   
-    def parse_json_review(self, review):
-        review['review']
-        review['author']['playtime_at_review']
-        review['voted_up']
-        review['votes_up']
-        review['timestamp_created']
-        review['votes_funny']
-        review['weighted_vote_score']
-        review['comment_count']
-    
-    def get_all_reviews(self):
+    def get_all_reviews(self, filename):
         total = 0
         json_text = self.make_request().json()
         num_reviews = int(json_text['query_summary']['num_reviews'])
         while json_text['success'] == 1 and num_reviews > 0:
             for review in json_text['reviews']:
                 total += 1
-                self.parse_json_review(review)
+                self.parse_json_review(review, total)
             self.cursor = json_text['cursor']
             print(f'Processed:{total} cursor:{self.cursor})')
             json_text = self.make_request().json()
-            num_reviews = int(json_text['query_summary']['num_reviews'])   
-        return total
-            
+            num_reviews = int(json_text['query_summary']['num_reviews']) 
+        
+        self.export_to_csv(filename)
+        return
     
+    def parse_json_review(self, review, index):
+        new_row = [
+                    index,
+                    self.appid,
+                    review['review'],
+                    review['author']['playtime_at_review'],
+                    review['timestamp_created'],
+                    review['voted_up'],
+                    review['votes_up'],
+                    review['votes_funny'],
+                    review['weighted_vote_score'],
+                    review['comment_count']
+                    ]
+        self.df.append(new_row)
+        return
+    
+    def export_to_csv(self, filename):
+        with open(filename, 'w') as f:
+            csv_writer = csv.writer(f)
+            for row in self.df:
+                csv_writer.writerow(row)
+        print(f'Successfully wrote {len(self.df)-1} lines to {filename}')      
+        self.clear_df()
+        return
+    
+    def clear_df(self):
+        self.df = []
+        return
+        
     def call_api(self):
         pass
     
@@ -69,11 +104,12 @@ class steamAPI():
         start = f'https://store.steampowered.com/appreviews/{self.appid}?json=1'
         params = vars(self).copy()
         params['appid'] = None
+        params['df'] = None
         r = requests.get(start, params)
         return r
 
 
-s = steamAPI(427520) # Factorio appid
-# s = steamAPI(766040) # Gloom appid
-# a = s.get_all_reviews())
+# s = steamAPI(427520) # Factorio appid
+s = steamAPI(766040) # Gloom appid
+a = s.get_all_reviews('test.csv')
 
