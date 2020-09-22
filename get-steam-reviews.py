@@ -6,19 +6,13 @@ Created on Sat Sep 12 20:17:44 2020
 @author: brianf
 """
 
-
-import json
-import pandas as pd
 import requests
-import pathlib
-import json
-import time
 import csv
 
 class steamAPI():
     
     def __init__(self, appid, filter_='recent', language='english', day_range=None,
-                 cursor='*', review_type='all', purchase_type='steam', num_per_page='20'):
+                 cursor='*', review_type='all', purchase_type='all', num_per_page='100'):
         self.filter = filter_
         self.language = language
         self.day_range = day_range
@@ -43,7 +37,7 @@ class steamAPI():
   
     def get_all_reviews(self, filename):
         total = 0
-        batch_size = 100
+        batch_size = 500
         json_text = self.make_request().json()
         num_reviews = int(json_text['query_summary']['num_reviews'])
         while json_text['success'] == 1 and num_reviews > 0:
@@ -62,6 +56,7 @@ class steamAPI():
         return
     
     def parse_json_review(self, review, index):
+        'Parses the json review text and adds it a list that will be written to csv'
         new_row = [
                     index,
                     self.appid,
@@ -78,6 +73,7 @@ class steamAPI():
         return
     
     def export_to_csv(self, filename):
+        'Writes the parsed review into a csv file'
         with open(filename, 'a') as f:
             csv_writer = csv.writer(f)
             for row in self.df:
@@ -89,9 +85,6 @@ class steamAPI():
     def clear_df(self):
         self.df = []
         return
-        
-    def call_api(self):
-        pass
     
     def set_parameters(self, **kwargs):
         for key, value in kwargs.items():
@@ -101,7 +94,8 @@ class steamAPI():
                 print('There is no attribute named {}'.format(key))
     
     def get_appid(self, product):
-        'http://api.steampowered.com/ISteamApps/GetAppList/v2'
+        'TODO'
+        # 'http://api.steampowered.com/ISteamApps/GetAppList/v2'
     
     def make_request(self):
         'Builds the request URL and returns a response object'
@@ -113,10 +107,16 @@ class steamAPI():
         return r
 
 
-factorio = steamAPI(427520) # Factorio appid
-factorio.get_all_reviews('factorio_20200920.csv')
+# factorio = steamAPI(427520) # Factorio appid
+# factorio.get_all_reviews('factorio_20200920.csv')
 
-gloom = steamAPI(766040) # Gloom appid
-gloom.get_all_reviews('gloom_20200920.csv')
+# gloom = steamAPI(766040) # Gloom appid
+# gloom.get_all_reviews('gloom_20200920.csv')
 
-# 'https://store.steampowered.com/appreviews/{self.appid}?json=1?cursor=AoJ4z4ae5eECesOBmgE='
+# dota2 = steamAPI(570) # Gloom appid
+# dota2.get_all_reviews('dota2_20200921.csv')
+
+# terraria = steamAPI(105600)
+# terraria.get_all_reviews('terraria_20200921.csv')
+
+# 'https://store.steampowered.com/appreviews/427520?json=1?cursor=AoJ4z4ae5eECesOBmgE='
